@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comparador EAN Inteligente</title>
+    <title>Comparador EAN Profesional</title>
     <style>
         * {
             box-sizing: border-box;
@@ -22,21 +22,9 @@
             margin: 0 auto 20px auto;
             text-align: center;
         }
-        h1 {
-            font-size: 1.5rem;
-            color: #1a1a1a;
-            margin-bottom: 5px;
-        }
-        p.subtitle {
-            color: #666;
-            font-size: 0.9rem;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            display: grid;
-            gap: 15px;
-        }
+        h1 { font-size: 1.5rem; color: #1a1a1a; margin-bottom: 5px; }
+        p.subtitle { color: #666; font-size: 0.9rem; }
+        .container { max-width: 800px; margin: 0 auto; display: grid; gap: 15px; }
         .card {
             background: white;
             border-radius: 12px;
@@ -58,25 +46,10 @@
             padding: 4px;
         }
         .btn-delete:hover { color: #ef4444; }
-        .product-info {
-            margin-bottom: 12px;
-            padding-right: 25px;
-        }
-        .product-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #222;
-        }
-        .product-ean {
-            font-size: 0.8rem;
-            color: #888;
-            margin-top: 2px;
-        }
-        .price-comparison {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
+        .product-info { margin-bottom: 12px; padding-right: 25px; }
+        .product-title { font-size: 1.1rem; font-weight: 600; color: #222; }
+        .product-ean { font-size: 0.8rem; color: #888; margin-top: 2px; }
+        .price-comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .shop-box {
             padding: 12px;
             border-radius: 8px;
@@ -85,24 +58,11 @@
             text-align: center;
             position: relative;
         }
-        .shop-name {
-            font-size: 0.8rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
+        .shop-name { font-size: 0.8rem; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
         .eci { color: #008046; }
         .mm { color: #df0000; }
-        .price {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #1e293b;
-        }
-        .winner {
-            background: #f0fdf4;
-            border-color: #bbf7d0;
-        }
+        .price { font-size: 1.3rem; font-weight: 700; color: #1e293b; }
+        .winner { background: #f0fdf4; border-color: #bbf7d0; }
         .winner .price { color: #166534; }
         .badge {
             position: absolute;
@@ -157,49 +117,21 @@
         }
         .modal-content h3 { margin-bottom: 15px; font-size: 1.2rem; }
         .form-group { margin-bottom: 15px; }
-        .form-group label {
-            display: block;
-            font-size: 0.85rem;
-            color: #666;
-            margin-bottom: 6px;
-            font-weight: 500;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 1rem;
-        }
+        .form-group label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 6px; font-weight: 500; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; }
         .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
-        .btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
         .btn-cancel { background: #f1f5f9; color: #475569; }
         .btn-save { background: #2563eb; color: white; }
-        .btn-save:disabled { background: #94a3b8; cursor: not-allowed; }
         
-        /* Loading indicador */
-        .loading-text {
-            display: none;
-            color: #2563eb;
-            font-size: 0.85rem;
-            margin-top: 5px;
-            font-weight: 500;
-        }
+        .loading-text { display: none; color: #2563eb; font-size: 0.85rem; margin-top: 5px; font-weight: 500; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Comparador EAN</h1>
-        <p class="subtitle">Búsqueda automática y guardado persistente</p>
+        <h1>Comparador EAN Fijo</h1>
+        <p class="subtitle">Búsqueda de descripción y consistencia de precios</p>
     </header>
 
     <div class="container" id="lista-productos">
@@ -212,34 +144,35 @@
             <h3>Buscar Producto por EAN</h3>
             <div class="form-group">
                 <label for="newEan">Introduce el código EAN</label>
-                <input type="number" id="newEan" placeholder="Ej. 6932554405557" pattern="[0-8]*">
-                <div class="loading-text" id="loadingText">Buscando producto en las bases de datos...</div>
+                <input type="number" id="newEan" placeholder="Ej. 6932554405557">
+                <div class="loading-text" id="loadingText">Buscando descripción en internet...</div>
             </div>
             <div class="modal-actions">
                 <button class="btn btn-cancel" onclick="cerrarModal()">Cancelar</button>
-                <button class="btn btn-save" id="btnGuardar" onclick="procesarEan()">Buscar y Añadir</button>
+                <button class="btn btn-save" id="btnBuscar" onclick="procesarEan()">Buscar</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Cargar datos desde localStorage al iniciar, o dejar array vacío si no hay nada guardado
-        let productos = JSON.parse(localStorage.getItem('mis_productos_ean')) || [
-            {
-                id: 1,
-                ean: "6932554405557",
+        // Diccionario estático de productos conocidos para que NUNCA varíen de precio si se repiten
+        const BD_PRECIOS_FIJOS = {
+            "6932554405557": {
                 nombre: "Xiaomi 17T Pro 12GB + 1TB (Deep Violet)",
                 precioECI: 1099.00,
                 precioMM: 1039.44
             }
-        ];
+        };
+
+        // Cargar lista activa del usuario desde el almacenamiento local
+        let productos = JSON.parse(localStorage.getItem('mis_productos_ean_v2')) || [];
 
         function renderProductos() {
             const container = document.getElementById('lista-productos');
             container.innerHTML = '';
 
             if (productos.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:#888; margin-top:20px;">Lista vacía. Pulsa "+" para escanear/añadir un EAN.</p>';
+                container.innerHTML = '<p style="text-align:center; color:#888; margin-top:20px;">Lista vacía. Pulsa "+" para añadir un EAN.</p>';
                 return;
             }
 
@@ -280,82 +213,84 @@
         function cerrarModal() {
             document.getElementById('modalFormulario').style.display = 'none';
             document.getElementById('newEan').value = '';
-            ocultarCarga();
-        }
-
-        function mostrarCarga() {
-            document.getElementById('loadingText').style.display = 'block';
-            document.getElementById('btnGuardar').disabled = true;
-        }
-
-        function ocultarCarga() {
             document.getElementById('loadingText').style.display = 'none';
-            document.getElementById('btnGuardar').disabled = false;
         }
 
-        // Simulación de consulta API con almacenamiento automático
         async function procesarEan() {
             const ean = document.getElementById('newEan').value.trim();
+            if (!ean) return alert('Introduce un EAN.');
 
-            if (!ean) {
-                alert('Por favor, introduce un código EAN válido.');
+            // Validar si el EAN ya existe exactamente igual en la pantalla para no duplicarlo sin sentido
+            const yaExiste = productos.some(p => p.ean === ean);
+            if (yaExiste) {
+                alert('Este producto ya está añadido en tu lista actual.');
+                cerrarModal();
                 return;
             }
 
-            mostrarCarga();
+            document.getElementById('loadingText').style.display = 'block';
 
-            // Simulamos la respuesta de red de un servicio de scraping/API externa
-            setTimeout(() => {
-                let nuevoProducto;
+            let nombreDetectado = "";
+            let pECI = 0;
+            let pMM = 0;
 
-                // Si es el EAN que conocemos, lo clava exacto
-                if (ean === "6932554405557") {
-                    nuevoProducto = {
-                        id: Date.now(),
-                        ean: ean,
-                        nombre: "Xiaomi 17T Pro 12GB + 1TB (Deep Violet)",
-                        precioECI: 1099.00,
-                        precioMM: 1039.44
-                    };
-                } else {
-                    // Para cualquier otro EAN, genera datos automáticos coherentes para que veas la funcionalidad
-                    const precioAleatorio = Math.floor(Math.random() * (600 - 150) + 150);
-                    const variacion = (Math.random() * 30).toFixed(2);
-                    
-                    nuevoProducto = {
-                        id: Date.now(),
-                        ean: ean,
-                        nombre: `Producto Genérico (EAN: ${ean.substring(0,4)}...)`,
-                        precioECI: parseFloat(precioAleatorio),
-                        precioMM: parseFloat((precioAleatorio - parseFloat(variacion) + 10).toFixed(2))
-                    };
+            // 1. Comprobar si es un producto ya registrado en nuestra base fija (como tu Xiaomi)
+            if (BD_PRECIOS_FIJOS[ean]) {
+                nombreDetectado = BD_PRECIOS_FIJOS[ean].nombre;
+                pECI = BD_PRECIOS_FIJOS[ean].precioECI;
+                pMM = BD_PRECIOS_FIJOS[ean].precioMM;
+            } else {
+                // 2. Intentar buscar la descripción real en una API pública de internet
+                try {
+                    const response = await fetch(`https://world.openfoodfacts.org/api/v2/product/${ean}.json`);
+                    const data = await response.json();
+                    if (data.status === 1 && data.product.product_name) {
+                        nombreDetectado = data.product.product_name;
+                    }
+                } catch (e) {
+                    console.log("Error consultando API externa");
                 }
 
-                // Guardar en el estado de la app
-                productos.push(nuevoProducto);
-                
-                // GUARDADO EN MEMORIA (LocalStorage)
-                actualizarMemoria();
+                // 3. Si la API no lo encuentra, pedimos los datos amablemente una única vez
+                if (!nombreDetectado) {
+                    document.getElementById('loadingText').style.display = 'none';
+                    nombreDetectado = prompt("No encontramos la descripción automática en internet para este EAN.\n\nPor favor, introduce la descripción del producto:");
+                    if (!nombreDetectado) { cerrarModal(); return; }
+                }
 
-                cerrarModal();
-                renderProductos();
-            }, 1200); // Pequeño delay para simular la búsqueda real en internet
+                // Solicitar precios estables para este EAN desconocido
+                const inputECI = prompt(`Introduce el precio para: ${nombreDetectado}\nen EL CORTE INGLÉS (€):`, "0.00");
+                pECI = parseFloat(inputECI) || 0;
+
+                const inputMM = prompt(`Introduce el precio para: ${nombreDetectado}\nen MEDIAMARKT (€):`, "0.00");
+                pMM = parseFloat(inputMM) || 0;
+
+                // Guardamos en nuestro registro temporal de sesión para que si lo vuelves a escribir sea idéntico
+                BD_PRECIOS_FIJOS[ean] = { nombre: nombreDetectado, precioECI: pECI, precioMM: pMM };
+            }
+
+            // Insertar en la lista visual
+            productos.push({
+                id: Date.now(),
+                ean: ean,
+                nombre: nombreDetectado,
+                precioECI: pECI,
+                precioMM: pMM
+            });
+
+            localStorage.setItem('mis_productos_ean_v2', JSON.stringify(productos));
+            cerrarModal();
+            renderProductos();
         }
 
         function eliminarProducto(id) {
-            if (confirm('¿Eliminar este producto permanentemente?')) {
+            if (confirm('¿Eliminar este producto?')) {
                 productos = productos.filter(prod => prod.id !== id);
-                actualizarMemoria();
+                localStorage.setItem('mis_productos_ean_v2', JSON.stringify(productos));
                 renderProductos();
             }
         }
 
-        // Sincroniza el array actual con la memoria del teléfono/navegador
-        function actualizarMemoria() {
-            localStorage.setItem('mis_productos_ean', JSON.stringify(productos));
-        }
-
-        // Carga y renderizado inicial
         renderProductos();
     </script>
 </body>
