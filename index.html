@@ -15,6 +15,7 @@
             background-color: #f5f7fa;
             color: #333;
             padding: 20px;
+            padding-bottom: 80px; /* Espacio para el botón flotante */
         }
         header {
             max-width: 800px;
@@ -42,9 +43,26 @@
             padding: 16px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             border: 1px solid #eef2f5;
+            position: relative;
+        }
+        .btn-delete {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            color: #94a3b8;
+            cursor: pointer;
+            line-height: 1;
+            padding: 4px;
+        }
+        .btn-delete:hover {
+            color: #ef4444;
         }
         .product-info {
             margin-bottom: 12px;
+            padding-right: 25px; /* Para que el texto no pise el aspa */
         }
         .product-title {
             font-size: 1.1rem;
@@ -76,8 +94,8 @@
             letter-spacing: 0.5px;
             margin-bottom: 4px;
         }
-        .eci { color: #008046; } /* Verde El Corte Inglés */
-        .mm { color: #df0000; }  /* Rojo MediaMarkt */
+        .eci { color: #008046; }
+        .mm { color: #df0000; }
         
         .price {
             font-size: 1.3rem;
@@ -102,6 +120,93 @@
             padding: 2px 6px;
             border-radius: 10px;
         }
+
+        /* Botón Flotante "+" */
+        .btn-add-floating {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 2rem;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        /* Ventana Modal (Cuadro de texto oculto por defecto) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            padding: 20px;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .modal-content h3 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-cancel {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        .btn-save {
+            background: #2563eb;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -112,13 +217,41 @@
     </header>
 
     <div class="container" id="lista-productos">
-        <!-- Los productos se inyectan aquí -->
+        </div>
+
+    <button class="btn-add-floating" onclick="abrirModal()">+</button>
+
+    <div class="modal-overlay" id="modalFormulario">
+        <div class="modal-content">
+            <h3>Añadir Producto</h3>
+            <div class="form-group">
+                <label for="newEan">Código EAN</label>
+                <input type="text" id="newEan" placeholder="Ej. 6932554405557">
+            </div>
+            <div class="form-group">
+                <label for="newNombre">Nombre del Producto</label>
+                <input type="text" id="newNombre" placeholder="Ej. Xiaomi 17T Pro">
+            </div>
+            <div class="form-group">
+                <label for="newECI">Precio El Corte Inglés (€)</label>
+                <input type="number" id="newECI" step="0.01" placeholder="0.00">
+            </div>
+            <div class="form-group">
+                <label for="newMM">Precio MediaMarkt (€)</label>
+                <input type="number" id="newMM" step="0.01" placeholder="0.00">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn btn-save" onclick="guardarProducto()">Guardar</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Los EAN como strings para evitar que se rompan con los ceros a la izquierda
-        const productos = [
+        // Listado inicial de productos
+        let productos = [
             {
+                id: Date.now(), // ID único para poder eliminarlo correctamente
                 ean: "6932554405557",
                 nombre: "Xiaomi 17T Pro 12GB + 1TB (Deep Violet)",
                 precioECI: 1099.00,
@@ -130,6 +263,11 @@
             const container = document.getElementById('lista-productos');
             container.innerHTML = '';
 
+            if (productos.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#888; margin-top:20px;">No hay productos en la lista. Pulsa "+" para añadir uno.</p>';
+                return;
+            }
+
             productos.forEach(prod => {
                 const eciEsMasBarato = prod.precioECI < prod.precioMM;
                 const mmEsMasBarato = prod.precioMM < prod.precioECI;
@@ -137,6 +275,7 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
+                    <button class="btn-delete" onclick="eliminarProducto(${prod.id})" title="Eliminar del listado">×</button>
                     <div class="product-info">
                         <div class="product-title">${prod.nombre}</div>
                         <div class="product-ean">EAN: ${prod.ean}</div>
@@ -158,7 +297,53 @@
             });
         }
 
-        // Ejecución limpia
+        // Funciones para controlar el cuadro de diálogo (Modal)
+        function abrirModal() {
+            document.getElementById('modalFormulario').style.display = 'flex';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalFormulario').style.display = 'none';
+            // Limpiar campos
+            document.getElementById('newEan').value = '';
+            document.getElementById('newNombre').value = '';
+            document.getElementById('newECI').value = '';
+            document.getElementById('newMM').value = '';
+        }
+
+        function guardarProducto() {
+            const ean = document.getElementById('newEan').value.trim();
+            const nombre = document.getElementById('newNombre').value.trim();
+            const precioECI = parseFloat(document.getElementById('newECI').value) || 0;
+            const precioMM = parseFloat(document.getElementById('newMM').value) || 0;
+
+            if (!ean || !nombre) {
+                alert('Por favor, rellena al menos el EAN y el Nombre del producto.');
+                return;
+            }
+
+            // Añadir el nuevo producto al array con un ID único
+            productos.push({
+                id: Date.now(),
+                ean: ean,
+                nombre: nombre,
+                precioECI: precioECI,
+                precioMM: precioMM
+            });
+
+            cerrarModal();
+            renderProductos();
+        }
+
+        // Función para eliminar líneas individualmente
+        function eliminarProducto(id) {
+            if (confirm('¿Seguro que quieres eliminar este producto de la lista?')) {
+                productos = productos.filter(prod => prod.id !== id);
+                renderProductos();
+            }
+        }
+
+        // Carga inicial
         renderProductos();
     </script>
 </body>
