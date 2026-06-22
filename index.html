@@ -84,7 +84,6 @@
             font-weight: 700;
             color: #1e293b;
         }
-        /* Estilos para destacar el mejor precio */
         .winner {
             background: #f0fdf4;
             border-color: #bbf7d0;
@@ -113,34 +112,25 @@
     </header>
 
     <div class="container" id="lista-productos">
-        <!-- Los productos se inyectan dinámicamente con JavaScript -->
+        <!-- Los productos se inyectan aquí -->
     </div>
 
     <script>
-        // Aquí puedes ir listando tus EANs y actualizando los precios manualmente
+        // Los EAN como strings para evitar que se rompan con los ceros a la izquierda
         const productos = [
             {
                 ean: "6932554405557",
                 nombre: "Xiaomi 17T Pro 12GB + 1TB (Deep Violet)",
-                precioECI: 1099.00, // PVP en El Corte Inglés
-                precioMM: 1039.44   // PVP en MediaMarkt
+                precioECI: 1099.00,
+                precioMM: 1039.44
             }
-            // Para añadir más, solo copias el bloque separado por una coma:
-            /*,
-            {
-                ean: "8412345678901",
-                nombre: "Nombre de otro terminal",
-                precioECI: 450.00,
-                precioMM: 439.00
-            }*/
         ];
 
-        function render Productos() {
+        function renderProductos() {
             const container = document.getElementById('lista-productos');
             container.innerHTML = '';
 
             productos.forEach(prod => {
-                // Lógica para saber cuál es más barato
                 const eciEsMasBarato = prod.precioECI < prod.precioMM;
                 const mmEsMasBarato = prod.precioMM < prod.precioECI;
 
@@ -168,7 +158,7 @@
             });
         }
 
-        // Ejecutar al cargar la página
+        // Ejecución limpia
         renderProductos();
     </script>
 </body>
