@@ -1,0 +1,175 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparador de Precios EAN</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            padding: 20px;
+        }
+        header {
+            max-width: 800px;
+            margin: 0 auto 20px auto;
+            text-align: center;
+        }
+        h1 {
+            font-size: 1.5rem;
+            color: #1a1a1a;
+            margin-bottom: 5px;
+        }
+        p.subtitle {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: grid;
+            gap: 15px;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #eef2f5;
+        }
+        .product-info {
+            margin-bottom: 12px;
+        }
+        .product-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #222;
+        }
+        .product-ean {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 2px;
+        }
+        .price-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .shop-box {
+            padding: 12px;
+            border-radius: 8px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            position: relative;
+        }
+        .shop-name {
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .eci { color: #008046; } /* Verde El Corte Inglés */
+        .mm { color: #df0000; }  /* Rojo MediaMarkt */
+        
+        .price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        /* Estilos para destacar el mejor precio */
+        .winner {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+        .winner .price {
+            color: #166534;
+        }
+        .badge {
+            position: absolute;
+            top: -8px;
+            right: 8px;
+            background: #22c55e;
+            color: white;
+            font-size: 0.65rem;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Comparador de Precios</h1>
+        <p class="subtitle">Control de PVP por código EAN</p>
+    </header>
+
+    <div class="container" id="lista-productos">
+        <!-- Los productos se inyectan dinámicamente con JavaScript -->
+    </div>
+
+    <script>
+        // Aquí puedes ir listando tus EANs y actualizando los precios manualmente
+        const productos = [
+            {
+                ean: "6932554405557",
+                nombre: "Xiaomi 17T Pro 12GB + 1TB (Deep Violet)",
+                precioECI: 1099.00, // PVP en El Corte Inglés
+                precioMM: 1039.44   // PVP en MediaMarkt
+            }
+            // Para añadir más, solo copias el bloque separado por una coma:
+            /*,
+            {
+                ean: "8412345678901",
+                nombre: "Nombre de otro terminal",
+                precioECI: 450.00,
+                precioMM: 439.00
+            }*/
+        ];
+
+        function render Productos() {
+            const container = document.getElementById('lista-productos');
+            container.innerHTML = '';
+
+            productos.forEach(prod => {
+                // Lógica para saber cuál es más barato
+                const eciEsMasBarato = prod.precioECI < prod.precioMM;
+                const mmEsMasBarato = prod.precioMM < prod.precioECI;
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="product-info">
+                        <div class="product-title">${prod.nombre}</div>
+                        <div class="product-ean">EAN: ${prod.ean}</div>
+                    </div>
+                    <div class="price-comparison">
+                        <div class="shop-box ${eciEsMasBarato ? 'winner' : ''}">
+                            ${eciEsMasBarato ? '<span class="badge">Más barato</span>' : ''}
+                            <div class="shop-name eci">El Corte Inglés</div>
+                            <div class="price">${prod.precioECI.toFixed(2)}€</div>
+                        </div>
+                        <div class="shop-box ${mmEsMasBarato ? 'winner' : ''}">
+                            ${mmEsMasBarato ? '<span class="badge">Más barato</span>' : ''}
+                            <div class="shop-name mm">MediaMarkt</div>
+                            <div class="price">${prod.precioMM.toFixed(2)}€</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Ejecutar al cargar la página
+        renderProductos();
+    </script>
+</body>
+</html>
