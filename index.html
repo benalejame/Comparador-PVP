@@ -3,275 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comparador EAN Profesional</title>
+    <title>Comparador EAN Rápido</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-        body {
-            background-color: #f5f7fa;
-            color: #333;
-            padding: 20px;
-            padding-bottom: 80px;
-        }
-        header {
-            max-width: 800px;
-            margin: 0 auto 20px auto;
-            text-align: center;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; padding: 20px; padding-bottom: 80px; }
+        header { max-width: 600px; margin: 0 auto 20px auto; text-align: center; }
         h1 { font-size: 1.5rem; color: #1a1a1a; margin-bottom: 5px; }
         p.subtitle { color: #666; font-size: 0.9rem; }
-        .container { max-width: 800px; margin: 0 auto; display: grid; gap: 15px; }
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border: 1px solid #eef2f5;
-            position: relative;
-        }
-        .btn-delete {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: none;
-            border: none;
-            font-size: 1.4rem;
-            color: #94a3b8;
-            cursor: pointer;
-            line-height: 1;
-            padding: 4px;
-        }
+        .container { max-width: 600px; margin: 0 auto; display: grid; gap: 15px; }
+        .card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eef2f5; position: relative; }
+        .btn-delete { position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.4rem; color: #94a3b8; cursor: pointer; }
         .btn-delete:hover { color: #ef4444; }
-        .product-info { margin-bottom: 12px; padding-right: 25px; }
+        .product-info { margin-bottom: 15px; }
         .product-title { font-size: 1.1rem; font-weight: 600; color: #222; }
         .product-ean { font-size: 0.8rem; color: #888; margin-top: 2px; }
         .price-comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .shop-box {
-            padding: 12px;
-            border-radius: 8px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            text-align: center;
-            position: relative;
-        }
-        .shop-name { font-size: 0.8rem; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
-        .eci { color: #008046; }
-        .mm { color: #df0000; }
-        .price { font-size: 1.3rem; font-weight: 700; color: #1e293b; }
-        .winner { background: #f0fdf4; border-color: #bbf7d0; }
-        .winner .price { color: #166534; }
-        .badge {
-            position: absolute;
-            top: -8px;
-            right: 8px;
-            background: #22c55e;
-            color: white;
-            font-size: 0.65rem;
-            font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 10px;
-        }
-        .btn-add-floating {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            font-size: 2rem;
-            font-weight: bold;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 20;
-            padding: 20px;
-        }
-        .modal-content {
-            background: white;
-            padding: 25px;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-        .modal-content h3 { margin-bottom: 15px; font-size: 1.2rem; }
+        .shop-box { display: block; text-decoration: none; padding: 14px; border-radius: 8px; text-align: center; color: white; font-weight: 600; font-size: 0.9rem; transition: transform 0.1s; }
+        .shop-box:active { transform: scale(0.98); }
+        .eci { background-color: #008046; }
+        .eci:hover { background-color: #006638; }
+        .mm { background-color: #df0000; }
+        .mm:hover { background-color: #b30000; }
+        .btn-add-floating { position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; background-color: #2563eb; color: white; border: none; border-radius: 50%; font-size: 2rem; font-weight: bold; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 20; padding: 20px; }
+        .modal-content { background: white; padding: 25px; border-radius: 16px; width: 100%; max-width: 400px; }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 6px; font-weight: 500; }
+        .form-group label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 6px; }
         .form-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; }
         .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
         .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
         .btn-cancel { background: #f1f5f9; color: #475569; }
         .btn-save { background: #2563eb; color: white; }
-        .btn-save:disabled { background: #94a3b8; cursor: not-allowed; }
-        
-        .loading-text { display: none; color: #2563eb; font-size: 0.85rem; margin-top: 5px; font-weight: 500; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Comparador EAN</h1>
-        <p class="subtitle">Consulta automatizada en Netlify en tiempo real</p>
+        <h1>Mi Lista de Precios</h1>
+        <p class="subtitle">Consulta directa sin bloqueos de servidor</p>
     </header>
 
-    <div class="container" id="lista-productos">
-        </div>
+    <div class="container" id="lista-productos"></div>
 
     <button class="btn-add-floating" onclick="abrirModal()">+</button>
 
     <div class="modal-overlay" id="modalFormulario">
         <div class="modal-content">
-            <h3>Buscar Producto por EAN</h3>
+            <h3 style="margin-bottom:15px;">Añadir EAN a la lista</h3>
             <div class="form-group">
-                <label for="newEan">Introduce el código EAN</label>
-                <input type="number" id="newEan" placeholder="Ej. 6932554405557">
-                <div class="loading-text" id="loadingText">Consultando precios en internet...</div>
+                <input type="number" id="newEan" placeholder="Ej. 8806097827191">
             </div>
             <div class="modal-actions">
                 <button class="btn btn-cancel" onclick="cerrarModal()">Cancelar</button>
-                <button class="btn btn-save" id="btnBuscar" onclick="procesarEan()">Buscar y Añadir</button>
+                <button class="btn btn-save" onclick="procesarEan()">Añadir</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Carga la lista guardada por el usuario en localStorage o empieza vacía
-        let productos = JSON.parse(localStorage.getItem('mis_productos_ean_v3')) || [];
+        let productos = JSON.parse(localStorage.getItem('mis_productos_v5')) || [];
 
-        // Función para renderizar las tarjetas en pantalla
         function renderProductos() {
             const container = document.getElementById('lista-productos');
             container.innerHTML = '';
 
             if (productos.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:#888; margin-top:20px;">Lista vacía. Pulsa "+" para escanear o introducir un EAN.</p>';
+                container.innerHTML = '<p style="text-align:center; color:#888; margin-top:20px;">Lista vacía. Pulsa "+" para añadir un código.</p>';
                 return;
             }
 
             productos.forEach(prod => {
-                const eciEsMasBarato = prod.precioECI < prod.precioMM;
-                const mmEsMasBarato = prod.precioMM < prod.precioECI;
-
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <button class="btn-delete" onclick="eliminarProducto(${prod.id})" title="Eliminar">×</button>
+                    <button class="btn-delete" onclick="eliminarProducto(${prod.id})">×</button>
                     <div class="product-info">
                         <div class="product-title">${prod.nombre}</div>
                         <div class="product-ean">EAN: ${prod.ean}</div>
                     </div>
                     <div class="price-comparison">
-                        <div class="shop-box ${eciEsMasBarato ? 'winner' : ''}">
-                            ${eciEsMasBarato ? '<span class="badge">Más barato</span>' : ''}
-                            <div class="shop-name eci">El Corte Inglés</div>
-                            <div class="price">${prod.precioECI > 0 ? prod.precioECI.toFixed(2) + '€' : 'Sin stock'}</div>
-                        </div>
-                        <div class="shop-box ${mmEsMasBarato ? 'winner' : ''}">
-                            ${mmEsMasBarato ? '<span class="badge">Más barato</span>' : ''}
-                            <div class="shop-name mm">MediaMarkt</div>
-                            <div class="price">${prod.precioMM > 0 ? prod.precioMM.toFixed(2) + '€' : 'Sin stock'}</div>
-                        </div>
+                        <a href="${prod.urlECI}" target="_blank" class="shop-box eci">El Corte Inglés ↗</a>
+                        <a href="${prod.urlMM}" target="_blank" class="shop-box mm">MediaMarkt ↗</a>
                     </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // Control del Modal
-        function abrirModal() {
-            document.getElementById('modalFormulario').style.display = 'flex';
-            document.getElementById('newEan').focus();
-        }
+        function abrirModal() { document.getElementById('modalFormulario').style.display = 'flex'; document.getElementById('newEan').focus(); }
+        function cerrarModal() { document.getElementById('modalFormulario').style.display = 'none'; document.getElementById('newEan').value = ''; }
 
-        function cerrarModal() {
-            document.getElementById('modalFormulario').style.display = 'none';
-            document.getElementById('newEan').value = '';
-            document.getElementById('loadingText').style.display = 'none';
-            document.getElementById('btnBuscar').disabled = false;
-        }
-
-        // PASO 3 CLAVE: Lógica de comunicación con la Netlify Function
         async function procesarEan() {
             const ean = document.getElementById('newEan').value.trim();
-            if (!ean) return alert('Por favor, introduce un EAN.');
+            if (!ean) return;
 
-            // Evitar duplicados en pantalla
-            const yaExiste = productos.some(p => p.ean === ean);
-            if (yaExiste) {
-                alert('Este producto ya está en tu lista actual.');
+            if (productos.some(p => p.ean === ean)) {
+                alert('Este código ya está en la lista.');
                 cerrarModal();
                 return;
             }
 
-            // Mostrar animación de carga y deshabilitar botón
-            document.getElementById('loadingText').style.display = 'block';
-            document.getElementById('btnBuscar').disabled = true;
-
             try {
-                // Al estar alojado en la misma app de Netlify, usamos la ruta relativa /.netlify/functions/...
                 const response = await fetch(`/.netlify/functions/buscar-ean?ean=${ean}`);
                 const data = await response.json();
 
-                if (data.error) {
-                    alert('Error en el servidor intermedio: ' + data.error);
-                    return;
-                }
-
-                // Guardar el nuevo producto devuelto por el servidor proxy
                 productos.push({
                     id: Date.now(),
                     ean: data.ean,
                     nombre: data.nombre,
-                    precioECI: data.precioECI,
-                    precioMM: data.precioMM
+                    urlECI: data.urlECI,
+                    urlMM: data.urlMM
                 });
 
-                // Guardar de forma persistente en LocalStorage
-                localStorage.setItem('mis_productos_ean_v3', JSON.stringify(productos));
-                
+                localStorage.setItem('mis_productos_v5', JSON.stringify(productos));
                 cerrarModal();
                 renderProductos();
-
-            } catch (error) {
-                console.error(error);
-                alert('No se pudo conectar con el servidor proxy de Netlify. Revisa el despliegue.');
-            } finally {
-                document.getElementById('loadingText').style.display = 'none';
-                document.getElementById('btnBuscar').disabled = false;
+            } catch (e) {
+                alert('Error al conectar con Netlify.');
             }
         }
 
-        // Eliminar tarjetas individualmente
         function eliminarProducto(id) {
-            if (confirm('¿Eliminar este producto permanentemente de la lista?')) {
-                productos = productos.filter(prod => prod.id !== id);
-                localStorage.setItem('mis_productos_ean_v3', JSON.stringify(productos));
+            if (confirm('¿Eliminar producto?')) {
+                productos = productos.filter(p => p.id !== id);
+                localStorage.setItem('mis_productos_v5', JSON.stringify(productos));
                 renderProductos();
             }
         }
 
-        // Ejecución inicial al abrir la página
         renderProductos();
     </script>
 </body>
