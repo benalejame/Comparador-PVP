@@ -123,6 +123,7 @@
         .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
         .btn-cancel { background: #f1f5f9; color: #475569; }
         .btn-save { background: #2563eb; color: white; }
+        .btn-save:disabled { background: #94a3b8; cursor: not-allowed; }
         
         .loading-text { display: none; color: #2563eb; font-size: 0.85rem; margin-top: 5px; font-weight: 500; }
     </style>
@@ -130,8 +131,8 @@
 <body>
 
     <header>
-        <h1>Comparador EAN Fijo</h1>
-        <p class="subtitle">Búsqueda de descripción y consistencia de precios</p>
+        <h1>Comparador EAN</h1>
+        <p class="subtitle">Consulta automatizada en Netlify en tiempo real</p>
     </header>
 
     <div class="container" id="lista-productos">
@@ -145,34 +146,26 @@
             <div class="form-group">
                 <label for="newEan">Introduce el código EAN</label>
                 <input type="number" id="newEan" placeholder="Ej. 6932554405557">
-                <div class="loading-text" id="loadingText">Buscando descripción en internet...</div>
+                <div class="loading-text" id="loadingText">Consultando precios en internet...</div>
             </div>
             <div class="modal-actions">
                 <button class="btn btn-cancel" onclick="cerrarModal()">Cancelar</button>
-                <button class="btn btn-save" id="btnBuscar" onclick="procesarEan()">Buscar</button>
+                <button class="btn btn-save" id="btnBuscar" onclick="procesarEan()">Buscar y Añadir</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Diccionario estático de productos conocidos para que NUNCA varíen de precio si se repiten
-        const BD_PRECIOS_FIJOS = {
-            "6932554405557": {
-                nombre: "Xiaomi 17T Pro 12GB + 1TB (Deep Violet)",
-                precioECI: 1099.00,
-                precioMM: 1039.44
-            }
-        };
+        // Carga la lista guardada por el usuario en localStorage o empieza vacía
+        let productos = JSON.parse(localStorage.getItem('mis_productos_ean_v3')) || [];
 
-        // Cargar lista activa del usuario desde el almacenamiento local
-        let productos = JSON.parse(localStorage.getItem('mis_productos_ean_v2')) || [];
-
+        // Función para renderizar las tarjetas en pantalla
         function renderProductos() {
             const container = document.getElementById('lista-productos');
             container.innerHTML = '';
 
             if (productos.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:#888; margin-top:20px;">Lista vacía. Pulsa "+" para añadir un EAN.</p>';
+                container.innerHTML = '<p style="text-align:center; color:#888; margin-top:20px;">Lista vacía. Pulsa "+" para escanear o introducir un EAN.</p>';
                 return;
             }
 
@@ -192,12 +185,12 @@
                         <div class="shop-box ${eciEsMasBarato ? 'winner' : ''}">
                             ${eciEsMasBarato ? '<span class="badge">Más barato</span>' : ''}
                             <div class="shop-name eci">El Corte Inglés</div>
-                            <div class="price">${prod.precioECI.toFixed(2)}€</div>
+                            <div class="price">${prod.precioECI > 0 ? prod.precioECI.toFixed(2) + '€' : 'Sin stock'}</div>
                         </div>
                         <div class="shop-box ${mmEsMasBarato ? 'winner' : ''}">
                             ${mmEsMasBarato ? '<span class="badge">Más barato</span>' : ''}
                             <div class="shop-name mm">MediaMarkt</div>
-                            <div class="price">${prod.precioMM.toFixed(2)}€</div>
+                            <div class="price">${prod.precioMM > 0 ? prod.precioMM.toFixed(2) + '€' : 'Sin stock'}</div>
                         </div>
                     </div>
                 `;
@@ -205,6 +198,7 @@
             });
         }
 
+        // Control del Modal
         function abrirModal() {
             document.getElementById('modalFormulario').style.display = 'flex';
             document.getElementById('newEan').focus();
@@ -214,83 +208,70 @@
             document.getElementById('modalFormulario').style.display = 'none';
             document.getElementById('newEan').value = '';
             document.getElementById('loadingText').style.display = 'none';
+            document.getElementById('btnBuscar').disabled = false;
         }
 
+        // PASO 3 CLAVE: Lógica de comunicación con la Netlify Function
         async function procesarEan() {
             const ean = document.getElementById('newEan').value.trim();
-            if (!ean) return alert('Introduce un EAN.');
+            if (!ean) return alert('Por favor, introduce un EAN.');
 
-            // Validar si el EAN ya existe exactamente igual en la pantalla para no duplicarlo sin sentido
+            // Evitar duplicados en pantalla
             const yaExiste = productos.some(p => p.ean === ean);
             if (yaExiste) {
-                alert('Este producto ya está añadido en tu lista actual.');
+                alert('Este producto ya está en tu lista actual.');
                 cerrarModal();
                 return;
             }
 
+            // Mostrar animación de carga y deshabilitar botón
             document.getElementById('loadingText').style.display = 'block';
+            document.getElementById('btnBuscar').disabled = true;
 
-            let nombreDetectado = "";
-            let pECI = 0;
-            let pMM = 0;
+            try {
+                // Al estar alojado en la misma app de Netlify, usamos la ruta relativa /.netlify/functions/...
+                const response = await fetch(`/.netlify/functions/buscar-ean?ean=${ean}`);
+                const data = await response.json();
 
-            // 1. Comprobar si es un producto ya registrado en nuestra base fija (como tu Xiaomi)
-            if (BD_PRECIOS_FIJOS[ean]) {
-                nombreDetectado = BD_PRECIOS_FIJOS[ean].nombre;
-                pECI = BD_PRECIOS_FIJOS[ean].precioECI;
-                pMM = BD_PRECIOS_FIJOS[ean].precioMM;
-            } else {
-                // 2. Intentar buscar la descripción real en una API pública de internet
-                try {
-                    const response = await fetch(`https://world.openfoodfacts.org/api/v2/product/${ean}.json`);
-                    const data = await response.json();
-                    if (data.status === 1 && data.product.product_name) {
-                        nombreDetectado = data.product.product_name;
-                    }
-                } catch (e) {
-                    console.log("Error consultando API externa");
+                if (data.error) {
+                    alert('Error en el servidor intermedio: ' + data.error);
+                    return;
                 }
 
-                // 3. Si la API no lo encuentra, pedimos los datos amablemente una única vez
-                if (!nombreDetectado) {
-                    document.getElementById('loadingText').style.display = 'none';
-                    nombreDetectado = prompt("No encontramos la descripción automática en internet para este EAN.\n\nPor favor, introduce la descripción del producto:");
-                    if (!nombreDetectado) { cerrarModal(); return; }
-                }
+                // Guardar el nuevo producto devuelto por el servidor proxy
+                productos.push({
+                    id: Date.now(),
+                    ean: data.ean,
+                    nombre: data.nombre,
+                    precioECI: data.precioECI,
+                    precioMM: data.precioMM
+                });
 
-                // Solicitar precios estables para este EAN desconocido
-                const inputECI = prompt(`Introduce el precio para: ${nombreDetectado}\nen EL CORTE INGLÉS (€):`, "0.00");
-                pECI = parseFloat(inputECI) || 0;
+                // Guardar de forma persistente en LocalStorage
+                localStorage.setItem('mis_productos_ean_v3', JSON.stringify(productos));
+                
+                cerrarModal();
+                renderProductos();
 
-                const inputMM = prompt(`Introduce el precio para: ${nombreDetectado}\nen MEDIAMARKT (€):`, "0.00");
-                pMM = parseFloat(inputMM) || 0;
-
-                // Guardamos en nuestro registro temporal de sesión para que si lo vuelves a escribir sea idéntico
-                BD_PRECIOS_FIJOS[ean] = { nombre: nombreDetectado, precioECI: pECI, precioMM: pMM };
+            } catch (error) {
+                console.error(error);
+                alert('No se pudo conectar con el servidor proxy de Netlify. Revisa el despliegue.');
+            } finally {
+                document.getElementById('loadingText').style.display = 'none';
+                document.getElementById('btnBuscar').disabled = false;
             }
-
-            // Insertar en la lista visual
-            productos.push({
-                id: Date.now(),
-                ean: ean,
-                nombre: nombreDetectado,
-                precioECI: pECI,
-                precioMM: pMM
-            });
-
-            localStorage.setItem('mis_productos_ean_v2', JSON.stringify(productos));
-            cerrarModal();
-            renderProductos();
         }
 
+        // Eliminar tarjetas individualmente
         function eliminarProducto(id) {
-            if (confirm('¿Eliminar este producto?')) {
+            if (confirm('¿Eliminar este producto permanentemente de la lista?')) {
                 productos = productos.filter(prod => prod.id !== id);
-                localStorage.setItem('mis_productos_ean_v2', JSON.stringify(productos));
+                localStorage.setItem('mis_productos_ean_v3', JSON.stringify(productos));
                 renderProductos();
             }
         }
 
+        // Ejecución inicial al abrir la página
         renderProductos();
     </script>
 </body>
