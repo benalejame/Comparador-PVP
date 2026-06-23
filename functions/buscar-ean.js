@@ -1,9 +1,7 @@
 export default async (request, context) => {
-  // 1. Extraer el código EAN de la URL de forma moderna
   const url = new URL(request.url);
   const ean = url.searchParams.get("ean");
 
-  // Cabeceras de seguridad para permitir que tu HTML lea los datos
   const headers = {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
@@ -11,37 +9,69 @@ export default async (request, context) => {
     "Access-Control-Allow-Methods": "GET, OPTIONS"
   };
 
-  // Manejar peticiones previas de control del navegador
   if (request.method === "OPTIONS") {
     return new Response("", { status: 200, headers });
   }
 
   if (!ean) {
-    return new Response(JSON.stringify({ error: "Falta el código EAN" }), { status: 400, headers });
+    return new Response(JSON.stringify({ error: "Falta el EAN" }), { status: 400, headers });
   }
 
-  // 2. Crear nombres específicos para los códigos que estás probando
+  // Enlaces de búsqueda directa por EAN en ambas tiendas
+  const urlECI = `https://www.elcorteingles.es/buscar/?term=${ean}`;
+  const urlMM = `https://www.mediamarkt.es/es/search.html?query=${ean}`;
+
+  let precioECI = 0;
+  let precioMM = 0;
   let nombreProducto = "Producto EAN: " + ean;
-  
-  if (ean === "6932554405557") {
-    nombreProducto = "Xiaomi 17T Pro 12GB + 1TB (Deep Violet)";
-  } else if (ean === "8806097827191") {
-    nombreProducto = "Televisor LG OLED55C14LB 55\"";
+
+  try {
+    // 1. CONSULTA A EL CORTE INGLÉS (A través del proxy gratuito Allorigins)
+    try {
+      const resECI = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(urlECI)}`);
+      const dataECI = await resECI.json();
+      const htmlECI = dataECI.contents;
+      
+      // Buscamos el precio en el HTML devuelto
+      const matchPrecio = htmlECI.match(/"price"\s*:\s*"([0-9.,]+)"/i) || htmlECI.match(/class="[^"]*current[^"]*"[^>]*>([0-9.,]+)/i);
+      if (matchPrecio) {
+        precioECI = parseFloat(matchPrecio[1].replace(/[^0-9,.]/g, '').replace(',', '.'));
+      }
+      
+      const matchTitulo = htmlECI.match(/<h1[^>]*>([^<]+)<\/h1>/i);
+      if (matchTitulo) {
+        nombreProducto = matchTitulo[1].trim();
+      }
+    } catch (e) {
+      console.log("No se pudo mapear El Corte Inglés");
+    }
+
+    // 2. CONSULTA A MEDIAMARKT (A través del proxy gratuito Allorigins)
+    try {
+      const resMM = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(urlMM)}`);
+      const dataMM = await resMM.json();
+      const htmlMM = dataMM.contents;
+      
+      const matchPrecioMM = htmlMM.match(/"price"\s*:\s*([0-9.]+)/i) || htmlMM.match(/data-testid="current-price"[^>]*>([0-9.,]+)/i);
+      if (matchPrecioMM) {
+        precioMM = parseFloat(matchPrecioMM[1].replace(/[^0-9,.]/g, '').replace(',', '.'));
+      }
+    } catch (e) {
+      console.log("No se pudo mapear MediaMarkt");
+    }
+
+    // Si ambos servidores bloquean el raspado automático en crudo, garantizamos que al menos 
+    // las tarjetas sean clicables para ver el precio real en la web oficial.
+    return new Response(JSON.stringify({
+      ean: ean,
+      nombre: nombreProducto,
+      precioECI: precioECI > 0 ? precioECI : 0.01, 
+      urlECI: urlECI,
+      precioMM: precioMM > 0 ? precioMM : 0.01,  
+      urlMM: urlMM
+    }), { status: 200, headers });
+
+  } catch (error) {
+    return new Response(JSON.stringify({ error: "Error en el servidor proxy" }), { status: 500, headers });
   }
-
-  // 3. Construir los enlaces de búsqueda directa en Google indexados por tienda
-  const urlBusquedaECI = `https://www.google.com/search?q=site:elcorteingles.es+${ean}`;
-  const urlBusquedaMM = `https://www.google.com/search?q=site:mediamarkt.es+${ean}`;
-
-  // 4. Enviar la respuesta limpia al HTML
-  const respuesta = {
-    ean: ean,
-    nombre: nombreProducto,
-    precioECI: 0.01, 
-    urlECI: urlBusquedaECI,
-    precioMM: 0.01,  
-    urlMM: urlBusquedaMM
-  };
-
-  return new Response(JSON.stringify(respuesta), { status: 200, headers });
 };
