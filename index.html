@@ -4,12 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comparador de Precios</title>
-    <link rel="icon" type="image/png" href="favicon.png">
     <style>
         :root {
             --primary-blue: #2563eb;
             --blue-cell: #e6f2ff;
-            --blue-border: #b3d7ff;
             --card-bg: #ffffff;
             --text-color: #333;
             --eci-green: #006737;
@@ -17,75 +15,51 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f8f9fa;
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f8f9fa; margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center;
         }
 
         header {
-            background-color: var(--eci-green);
-            color: white;
-            width: 100%;
-            position: fixed;
-            top: 0;
-            z-index: 100;
-            text-align: center;
-            padding: 15px 0;
+            background-color: var(--eci-green); color: white; width: 100%;
+            position: fixed; top: 0; z-index: 100; text-align: center; padding: 15px 0;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
 
-        header h1 { margin: 0; font-size: 1.3rem; letter-spacing: 0.5px; font-weight: 700; }
+        header h1 { margin: 0; font-size: 1.3rem; font-weight: 700; }
 
         .wrapper-global {
-            margin-top: 80px;
-            width: 100%;
-            max-width: 650px;
-            padding: 0 8px 0 14px; 
-            box-sizing: border-box;
-            position: relative;
-            display: flex;
-            justify-content: flex-end;
+            margin-top: 80px; width: 100%; max-width: 650px;
+            padding: 0 8px 0 14px; box-sizing: border-box;
+            position: relative; display: flex; justify-content: flex-end;
         }
 
         .container { width: 100%; box-sizing: border-box; padding-bottom: 110px; }
 
         .product-card {
-            background: #ffffff;
-            border-radius: 12px;
+            background: #ffffff; border-radius: 12px; padding: 16px;
+            margin-bottom: 20px; border: 1px solid #e9ecef; position: relative;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            padding: 16px;
-            margin-bottom: 20px;
-            border: 1px solid #e9ecef;
-            position: relative;
         }
 
         .btn-delete {
             position: absolute; top: 12px; right: 12px; background: none; border: none;
-            font-size: 1.4rem; color: #a0aec0; cursor: pointer; line-height: 1;
+            font-size: 1.4rem; color: #a0aec0; cursor: pointer;
         }
 
-        .product-info { margin-bottom: 15px; padding-right: 20px; }
+        .product-info { margin-bottom: 15px; }
         .product-title { font-size: 1.1rem; font-weight: 700; color: #2d3748; }
-        .product-ean { font-size: 0.85rem; color: #718096; margin-top: 3px; font-weight: 500; }
+        .product-ean { font-size: 0.85rem; color: #718096; margin-top: 3px; }
 
         .price-comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
         .shop-btn {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-decoration: none; padding: 10px; border-radius: 8px; text-align: center;
-            color: white; font-weight: 700; font-size: 0.9rem; transition: transform 0.1s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            color: white; font-weight: 700; font-size: 0.9rem;
         }
 
-        .shop-btn:active { transform: scale(0.97); }
-        .shop-btn .price-tag { font-size: 1.1rem; font-weight: 800; margin-top: 2px; color: #fff; }
-
+        .shop-btn .price-tag { font-size: 1.1rem; font-weight: 800; margin-top: 2px; }
         .shop-btn.eci { background-color: var(--eci-green); }
         .shop-btn.mm { background-color: var(--mm-red); }
 
@@ -100,20 +74,13 @@
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px);
-            display: none; align-items: center; justify-content: center; z-index: 300; padding: 20px;
+            display: none; align-items: center; justify-content: center; z-index: 300;
         }
 
-        .modal-content {
-            background: white; padding: 24px; border-radius: 16px; width: 100%;
-            max-width: 360px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); position: relative;
-        }
-
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .modal-header h3 { margin: 0; font-size: 1.1rem; color: #2d3748; }
-        .btn-close-modal { background: none; border: none; font-size: 1.6rem; color: #a0aec0; cursor: pointer; }
-        .form-group input { width: 100%; padding: 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+        .modal-content { background: white; padding: 24px; border-radius: 16px; width: 100%; max-width: 360px; }
+        .form-group input { width: 100%; padding: 14px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
         .modal-actions { display: flex; gap: 12px; margin-top: 20px; }
-        .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; }
         .btn-cancel { background: #edf2f7; color: #4a5568; }
         .btn-save { background: var(--primary-blue); color: white; }
 
@@ -121,7 +88,7 @@
             position: fixed; left: calc(50% - 325px); top: 25vh; 
             transform: rotate(180deg); writing-mode: vertical-lr;
             font-size: 0.72rem; color: #cbd5e1; font-weight: 600;
-            letter-spacing: 1px; white-space: nowrap; z-index: 50; pointer-events: none;
+            letter-spacing: 1px; white-space: nowrap; z-index: 50;
         }
 
         @media (max-width: 670px) { footer { left: 1px; } }
@@ -133,7 +100,7 @@
         <h1>Comparador de Precios</h1>
     </header>
 
-    <footer id="app-footer" style="display: none;">
+    <footer>
         Ben A. M. &copy; <span id="copyright-years">2026</span>
     </footer>
 
@@ -145,13 +112,8 @@
 
     <div class="modal-overlay" id="modalFormulario">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3>Añadir Código EAN</h3>
-                <button class="btn-close-modal" onclick="cerrarModal()">&times;</button>
-            </div>
-            <div class="form-group">
-                <input type="number" id="newEan" placeholder="Ej. 8806097827191" pattern="[0-9]*" inputmode="numeric">
-            </div>
+            <h3>Añadir Código EAN</h3>
+            <div class="form-group"><input type="number" id="newEan" placeholder="Ej. 8410000000000"></div>
             <div class="modal-actions">
                 <button class="btn btn-cancel" onclick="cerrarModal()">Cancelar</button>
                 <button class="btn btn-save" onclick="procesarEan()">Añadir</button>
@@ -160,48 +122,63 @@
     </div>
 
     <script>
-        let productos = JSON.parse(localStorage.getItem('mis_productos_v7')) || [];
+        // CONFIGURA AQUÍ TUS DATOS DE JSONBIN
+        const BIN_ID = "6a3d6fbcf5f4af5e293058fb";
+        const API_KEY = "$2a$10$LcJDaI6WMihw0rOZ7.rYw.5J8th0j1Bs6/XRiJei90Gnlc0mWGGne";
 
-        function init() {
-            document.getElementById('app-footer').style.display = 'block';
+        let productos = JSON.parse(localStorage.getItem('mis_productos_v8')) || [];
+
+        async function init() {
             const currentYear = new Date().getFullYear();
             document.getElementById('copyright-years').innerText = currentYear > 2026 ? `2026 - ${currentYear}` : `2026`;
-            
-            // 🚨 ESCUCHADOR INTELIGENTE: Recibe el precio desde la pestaña de la tienda
-            window.addEventListener("message", (event) => {
-                if (event.data && event.data.type === "CAPTURED_PRICE") {
-                    const { ean, tienda, precio, titulo } = event.data;
-                    const pIdx = productos.findIndex(p => p.ean === ean);
-                    if (pIdx !== -1) {
-                        if (tienda === "ECI") productos[pIdx].precioECI = precio;
-                        if (tienda === "MM") productos[pIdx].precioMM = precio;
-                        if (titulo && productos[pIdx].nombre.startsWith("Producto EAN:")) productos[pIdx].nombre = titulo;
-                        
-                        localStorage.setItem('mis_productos_v7', JSON.stringify(productos));
-                        renderProductos();
-                    }
-                }
-            });
-
             renderProductos();
+
+            // Sincroniza con la nube automáticamente cada 3 segundos
+            setInterval(recibirPreciosRemotos, 3000);
+        }
+
+        async function recibirPreciosRemotos() {
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { "X-Master-Key": API_KEY }
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                const remotos = data.record;
+
+                let cambiado = false;
+                productos.forEach(p => {
+                    if (remotos[p.ean]) {
+                        if (remotos[p.ean].precioECI && p.precioECI !== remotos[p.ean].precioECI) {
+                            p.precioECI = remotos[p.ean].precioECI;
+                            cambiado = true;
+                        }
+                        if (remotos[p.ean].precioMM && p.precioMM !== remotos[p.ean].precioMM) {
+                            p.precioMM = remotos[p.ean].precioMM;
+                            cambiado = true;
+                        }
+                        if (remotos[p.ean].titulo && p.nombre.startsWith("Producto EAN:")) {
+                            p.nombre = remotos[p.ean].titulo;
+                            cambiado = true;
+                        }
+                    }
+                });
+
+                if (cambiado) {
+                    localStorage.setItem('mis_productos_v8', JSON.stringify(productos));
+                    renderProductos();
+                }
+            } catch (e) { console.log("Error de sincronización"); }
         }
 
         function renderProductos() {
             const container = document.getElementById('lista-productos');
             container.innerHTML = '';
-
-            if (productos.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:#a0aec0; margin-top:40px; font-weight:500;">Tu lista está vacía.</p>';
-                return;
-            }
+            if (productos.length === 0) return;
 
             productos.forEach(prod => {
                 const card = document.createElement('div');
                 card.className = 'product-card';
-                
-                const txtECI = prod.precioECI ? `${prod.precioECI} €` : "Ver precio";
-                const txtMM = prod.precioMM ? `${prod.precioMM} €` : "Ver precio";
-
                 card.innerHTML = `
                     <button class="btn-delete" onclick="eliminarProducto(${prod.id})">&times;</button>
                     <div class="product-info">
@@ -211,11 +188,11 @@
                     <div class="price-comparison">
                         <a href="${prod.urlECI}" target="_blank" class="shop-btn eci">
                             <span>El Corte Inglés</span>
-                            <span class="price-tag">${txtECI}</span>
+                            <span class="price-tag">${prod.precioECI ? prod.precioECI + ' €' : 'Ver precio'}</span>
                         </a>
                         <a href="${prod.urlMM}" target="_blank" class="shop-btn mm">
                             <span>MediaMarkt</span>
-                            <span class="price-tag">${txtMM}</span>
+                            <span class="price-tag">${prod.precioMM ? prod.precioMM + ' €' : 'Ver precio'}</span>
                         </a>
                     </div>
                 `;
@@ -229,24 +206,24 @@
         function procesarEan() {
             const ean = document.getElementById('newEan').value.trim();
             if (!ean) return;
+            if (productos.some(p => p.ean === ean)) { cerrarModal(); return; }
 
-            if (productos.some(p => p.ean === ean)) { alert('Este código ya existe.'); cerrarModal(); return; }
-
+            // CORRECCIÓN URL: ECI usa /s/?text= para búsquedas limpias directas
             productos.push({
                 id: Date.now(), ean: ean, nombre: "Producto EAN: " + ean,
                 precioECI: null, precioMM: null,
-                urlECI: `https://www.elcorteingles.es/buscar/?term=${ean}`,
+                urlECI: `https://www.elcorteingles.es/s/?text=${ean}`,
                 urlMM: `https://www.mediamarkt.es/es/search.html?query=${ean}`
             });
 
-            localStorage.setItem('mis_productos_v7', JSON.stringify(productos));
+            localStorage.setItem('mis_productos_v8', JSON.stringify(productos));
             cerrarModal(); renderProductos();
         }
 
         function eliminarProducto(id) {
-            if (confirm('¿Eliminar producto?')) {
+            if (confirm('¿Eliminar?')) {
                 productos = productos.filter(p => p.id !== id);
-                localStorage.setItem('mis_productos_v7', JSON.stringify(productos));
+                localStorage.setItem('mis_productos_v8', JSON.stringify(productos));
                 renderProductos();
             }
         }
