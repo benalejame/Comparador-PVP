@@ -122,7 +122,7 @@
     </div>
 
     <script>
-        // CONFIGURA AQUÍ TUS DATOS DE JSONBIN
+        // DATOS DE TU BASE DE DATOS YA VINCULADOS
         const BIN_ID = "6a3d6fbcf5f4af5e293058fb";
         const API_KEY = "$2a$10$LcJDaI6WMihw0rOZ7.rYw.5J8th0j1Bs6/XRiJei90Gnlc0mWGGne";
 
@@ -132,19 +132,19 @@
             const currentYear = new Date().getFullYear();
             document.getElementById('copyright-years').innerText = currentYear > 2026 ? `2026 - ${currentYear}` : `2026`;
             renderProductos();
-
-            // Sincroniza con la nube automáticamente cada 3 segundos
             setInterval(recibirPreciosRemotos, 3000);
         }
 
         async function recibirPreciosRemotos() {
+            const limpioBinId = BIN_ID.trim();
+            if (limpioBinId === "") return;
+
             try {
-                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-                    headers: { "X-Master-Key": API_KEY }
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${limpioBinId}/latest?meta=false`, {
+                    headers: { "X-Master-Key": API_KEY.trim() }
                 });
                 if (!res.ok) return;
-                const data = await res.json();
-                const remotos = data.record;
+                const remotos = await res.json();
 
                 let cambiado = false;
                 productos.forEach(p => {
@@ -208,11 +208,10 @@
             if (!ean) return;
             if (productos.some(p => p.ean === ean)) { cerrarModal(); return; }
 
-            // CORRECCIÓN URL: ECI usa /s/?text= para búsquedas limpias directas
             productos.push({
                 id: Date.now(), ean: ean, nombre: "Producto EAN: " + ean,
                 precioECI: null, precioMM: null,
-                urlECI: `https://www.elcorteingles.es/s/?text=${ean}`,
+                urlECI: `https://www.elcorteingles.es/buscar/?term=${ean}`,
                 urlMM: `https://www.mediamarkt.es/es/search.html?query=${ean}`
             });
 
